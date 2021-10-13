@@ -260,7 +260,7 @@ int uwsgi_remove_subscribe_node(struct uwsgi_subscribe_slot **slot, struct uwsgi
 #ifdef UWSGI_SSL
 			if (node_slot->sign_ctx) {
 				EVP_PKEY_free(node_slot->sign_public_key);
-				EVP_MD_CTX_destroy(node_slot->sign_ctx);
+				EVP_MD_CTX_free(node_slot->sign_ctx);
 			}
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
 			// if there is a SNI context active, destroy it
@@ -289,7 +289,7 @@ int uwsgi_remove_subscribe_node(struct uwsgi_subscribe_slot **slot, struct uwsgi
 #ifdef UWSGI_SSL
 		if (node_slot->sign_ctx) {
 			EVP_PKEY_free(node_slot->sign_public_key);
-			EVP_MD_CTX_destroy(node_slot->sign_ctx);
+			EVP_MD_CTX_free(node_slot->sign_ctx);
 		}
 #endif
 		free(node_slot);
@@ -773,7 +773,7 @@ static int subscription_new_sign_ctx(struct uwsgi_subscribe_slot *slot, struct u
         	uwsgi_log("unable to load public key for %.*s\n", usr->keylen, usr->key);
 		return 0;
 	}
-	slot->sign_ctx = EVP_MD_CTX_create();
+	slot->sign_ctx = EVP_MD_CTX_new();
 	if (!slot->sign_ctx) {
         	uwsgi_log("unable to initialize EVP context for %.*s\n", usr->keylen, usr->key);
                 EVP_PKEY_free(slot->sign_public_key);
@@ -782,7 +782,7 @@ static int subscription_new_sign_ctx(struct uwsgi_subscribe_slot *slot, struct u
 
 	if (!uwsgi_subscription_sign_check(slot, usr)) {
 		EVP_PKEY_free(slot->sign_public_key);
-		EVP_MD_CTX_destroy(slot->sign_ctx);
+		EVP_MD_CTX_free(slot->sign_ctx);
 		return 0;
 	}
 

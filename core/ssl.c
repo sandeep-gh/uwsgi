@@ -2,7 +2,8 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 #include <openssl/md5.h>
-
+ #include <openssl/ssl.h>
+#include <openssl/err.h>
 extern struct uwsgi_server uwsgi;
 /*
 
@@ -17,7 +18,7 @@ void uwsgi_ssl_init(void) {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
         OPENSSL_config(NULL);
 #endif
-        SSL_library_init();
+        OPENSSL_init_ssl();
         SSL_load_error_strings();
         OpenSSL_add_all_algorithms();
         uwsgi.ssl_initialized = 1;
@@ -474,7 +475,7 @@ char *uwsgi_rsa_sign(char *algo_key, char *message, size_t message_len, unsigned
 
         fclose(kf);
 
-        EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+        EVP_MD_CTX *ctx = EVP_MD_CTX_new();
         if (!ctx) {
                 free(algo);
                 EVP_PKEY_free(pk);
@@ -486,7 +487,7 @@ char *uwsgi_rsa_sign(char *algo_key, char *message, size_t message_len, unsigned
                 uwsgi_log("unknown digest algo: %s\n", algo);
                 free(algo);
                 EVP_PKEY_free(pk);
-                EVP_MD_CTX_destroy(ctx);
+                EVP_MD_CTX_free(ctx);
                 return NULL;
         }
 
@@ -521,7 +522,7 @@ char *uwsgi_rsa_sign(char *algo_key, char *message, size_t message_len, unsigned
 clear:
         free(algo);
         EVP_PKEY_free(pk);
-        EVP_MD_CTX_destroy(ctx);
+        EVP_MD_CTX_free(ctx);
         return signature;
 
 }

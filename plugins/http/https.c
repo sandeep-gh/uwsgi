@@ -103,7 +103,7 @@ void uwsgi_opt_https2(char *opt, char *value, void *cr) {
 
 #ifdef UWSGI_SPDY
 	if (s2_spdy) {
-        	uhttp.spdy_index = SSL_CTX_get_ex_new_index(0, NULL, NULL, NULL, NULL);
+          uhttp.spdy_index = CRYPTO_get_ex_new_index(CRYPTO_EX_INDEX_SSL, 0, NULL, NULL, NULL, NULL);
 		uhttp.spdy3_settings = uwsgi_buffer_new(uwsgi.page_size);
 		if (uwsgi_buffer_append(uhttp.spdy3_settings, "\x80\x03\x00\x04\x01", 5)) goto spdyerror;
 		if (uwsgi_buffer_u24be(uhttp.spdy3_settings, (8 * 2) + 4)) goto spdyerror;

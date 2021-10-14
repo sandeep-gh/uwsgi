@@ -18,9 +18,11 @@ void uwsgi_ssl_init(void) {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
         OPENSSL_config(NULL);
 #endif
-        OPENSSL_init_ssl();
-        SSL_load_error_strings();
-        OpenSSL_add_all_algorithms();
+        //OPENSSL_init_ssl();
+        //SSL_load_error_strings();
+        OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS \
+                            | OPENSSL_INIT_ADD_ALL_DIGESTS, NULL);
+          //OpenSSL_add_all_algorithms();
         uwsgi.ssl_initialized = 1;
 }
 
@@ -213,7 +215,7 @@ SSL_CTX *uwsgi_ssl_new_server_context(char *name, char *crt, char *key, char *ci
 	int key_need_free = 0;
 	int client_ca_need_free = 0;
 
-        SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
+        SSL_CTX *ctx = SSL_CTX_new(TLS_server_method());
         if (!ctx) {
                 uwsgi_log("[uwsgi-ssl] unable to initialize context \"%s\"\n", name);
                 return NULL;
